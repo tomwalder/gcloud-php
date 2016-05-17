@@ -1,0 +1,33 @@
+{
+    "name": "google/pubsub",
+    "type": "library",
+    "description": "Client library for Google Cloud Pub/Sub",
+    "keywords": ["google"],
+    "homepage": "http://www.google.com",
+    "license": "Apache-2.0",
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/stanley-cheung/Protobuf-PHP"
+        },
+        {
+	    "type": "path",
+	    "url": "../gax-php"
+	}
+    ],
+    "require": {
+        "php": ">=5.5",
+        "google/auth": "^0.7.0",
+        "grpc/grpc": "dev-release-0_13",
+        "google/gax": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Google\\Pubsub\\V1\\":"src/"
+        }
+    }
+}

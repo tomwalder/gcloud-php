@@ -1,0 +1,47 @@
+{
+  "interfaces": {
+    "google.pubsub.v1.Publisher": {
+      "retry_codes": {
+        "idempotent": ["UNAVAILABLE", "DEADLINE_EXCEEDED"],
+        "non_idempotent": []
+      },
+      "retry_params": {
+        "default": {
+          "initial_retry_delay_millis": 100,
+          "retry_delay_multiplier": 1.2,
+          "max_retry_delay_millis": 1000,
+          "initial_rpc_timeout_millis": 20000,
+          "rpc_timeout_multiplier": 1.5,
+          "max_rpc_timeout_millis": 30000,
+          "total_timeout_millis": 45000
+        }
+      },
+      "methods": {
+        "CreateTopic": {
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "Publish": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "GetTopic": {
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "ListTopics": {
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "ListTopicSubscriptions": {
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "DeleteTopic": {
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        }
+      }
+    }
+  }
+}
