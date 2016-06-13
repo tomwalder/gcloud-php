@@ -20,6 +20,7 @@ namespace Google\Cloud\Tests\BigQuery;
 use Google\Cloud\BigQuery\Connection\ConnectionInterface;
 use Google\Cloud\BigQuery\Job;
 use Google\Cloud\BigQuery\Table;
+use Google\Cloud\Exception\NotFoundException;
 use Google\Cloud\Storage\Connection\ConnectionInterface as StorageConnectionInterface;
 use Google\Cloud\Storage\Object;
 use Google\Cloud\Upload\AbstractUploader;
@@ -90,7 +91,8 @@ class TableTest extends \PHPUnit_Framework_TestCase
 
     public function testDoesExistFalse()
     {
-        $this->connection->getTable(Argument::any())->willThrow(new \Exception(null, 404))
+        $this->connection->getTable(Argument::any())
+            ->willThrow(new NotFoundException(null))
             ->shouldBeCalledTimes(1);
         $table = $this->getTable($this->connection);
 
@@ -107,7 +109,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(1);
 
         $table = $this->getTable($this->connection);
-        $rows = iterator_to_array($table->getRows());
+        $rows = iterator_to_array($table->rows());
 
         $this->assertEmpty($rows);
     }
@@ -122,7 +124,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(1);
 
         $table = $this->getTable($this->connection);
-        $rows = iterator_to_array($table->getRows());
+        $rows = iterator_to_array($table->rows());
 
         $this->assertEquals(
             $this->rowData['rows'][0]['f'][0]['v'],
@@ -146,7 +148,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(2);
 
         $table = $this->getTable($this->connection);
-        $rows = iterator_to_array($table->getRows());
+        $rows = iterator_to_array($table->rows());
 
         $this->assertEquals($name, $rows[1]['first_name']);
     }
@@ -179,7 +181,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
         $job = $table->copy($destinationTable);
 
         $this->assertInstanceOf(Job::class, $job);
-        $this->assertEquals($this->insertJobResponse, $job->getInfo());
+        $this->assertEquals($this->insertJobResponse, $job->info());
     }
 
     public function testRunsExportJob()
@@ -207,7 +209,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
         $job = $table->export($destinationObject);
 
         $this->assertInstanceOf(Job::class, $job);
-        $this->assertEquals($this->insertJobResponse, $job->getInfo());
+        $this->assertEquals($this->insertJobResponse, $job->info());
     }
 
     public function testRunsLoadJob()
@@ -237,7 +239,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
         $job = $table->load($data);
 
         $this->assertInstanceOf(Job::class, $job);
-        $this->assertEquals($this->insertJobResponse, $job->getInfo());
+        $this->assertEquals($this->insertJobResponse, $job->info());
     }
 
     public function testRunsLoadJobFromStorage()
@@ -265,7 +267,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
         $job = $table->loadFromStorage($sourceObject);
 
         $this->assertInstanceOf(Job::class, $job);
-        $this->assertEquals($this->insertJobResponse, $job->getInfo());
+        $this->assertEquals($this->insertJobResponse, $job->info());
     }
 
     public function testGetsInfo()
@@ -274,7 +276,7 @@ class TableTest extends \PHPUnit_Framework_TestCase
         $this->connection->getTable(Argument::any())->shouldNotBeCalled();
         $table = $this->getTable($this->connection, $tableInfo);
 
-        $this->assertEquals($tableInfo, $table->getInfo());
+        $this->assertEquals($tableInfo, $table->info());
     }
 
     public function testGetsInfoWithReload()
@@ -285,21 +287,21 @@ class TableTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(1);
         $table = $this->getTable($this->connection);
 
-        $this->assertEquals($tableInfo, $table->getInfo());
+        $this->assertEquals($tableInfo, $table->info());
     }
 
     public function testGetsId()
     {
         $table = $this->getTable($this->connection);
 
-        $this->assertEquals($this->tableId, $table->getId());
+        $this->assertEquals($this->tableId, $table->id());
     }
 
     public function testGetsIdentity()
     {
         $table = $this->getTable($this->connection);
 
-        $this->assertEquals($this->tableId, $table->getIdentity()['tableId']);
-        $this->assertEquals($this->projectId, $table->getIdentity()['projectId']);
+        $this->assertEquals($this->tableId, $table->identity()['tableId']);
+        $this->assertEquals($this->projectId, $table->identity()['projectId']);
     }
 }

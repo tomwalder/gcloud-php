@@ -93,7 +93,8 @@ class DocGenerator
         $id = substr($reflector->getName(), 14);
         $id = str_replace('\\', '/', $id);
         // @todo see if there is a better way to determine the type
-        $type = end(explode('_', get_class($reflector->getNode())));
+        $parts = explode('_', get_class($reflector->getNode()));
+        $type = end($parts);
 
         return [
             'id' => strtolower($id),
@@ -131,6 +132,18 @@ class DocGenerator
     {
         $methodArray = [];
         foreach ($methods as $method) {
+            if ($method->getVisibility() !== 'public') {
+                continue;
+            }
+
+            $access = $method->getDocBlock()->getTagsByName('access');
+
+            if (!empty($access)) {
+                if ($access[0]->getContent() === 'private') {
+                    continue;
+                }
+            }
+
             $methodArray[] = $this->buildMethod($method);
         }
 
@@ -189,6 +202,11 @@ class DocGenerator
             }
 
             $lines = explode(PHP_EOL, $example);
+
+            // strip the syntax highlighting, it won't be used in the doc site
+            if (substr($lines[0], 0, 3) === 'php') {
+                unset($lines[0]);
+            }
 
             foreach ($lines as $key => $line) {
                 if (substr($line, 0, 2) === '//') {
@@ -327,7 +345,7 @@ class DocGenerator
         foreach ($returns as $return) {
             $returnsArray[] = [
                 'types' => $this->handleTypes($return->getTypes()),
-                'description' => $return->getDescription()
+                'description' => $this->markdown->parse($return->getDescription())
             ];
         }
 
@@ -352,22 +370,28 @@ class DocGenerator
         }
 
         $displayName = $content;
-        $content = substr($content, 7);
+        $content = substr($content, 13);
         $parts = explode('::', $content);
-        $content = strtolower(str_replace('\\', '/', $parts[0]));
+        $type = strtolower(str_replace('\\', '/', $parts[0]));
+
+        $openTag = '<a data-custom-type="' . $type . '"';
 
         if (isset($parts[1])) {
-            $content .= '#' . str_replace('()', '', $parts[1]);
+            $method = str_replace('()', '', $parts[1]);
+            $openTag .= ' data-method="' . $method . '">';
+        } else {
+            $openTag .= '>';
         }
 
-        return '<a data-custom-type="' . $content . '">' . $displayName . '</a>';
+        return $openTag . $displayName . '</a>';
     }
 
     private function buildOutputPath()
     {
         $pathInfo = pathinfo($this->currentFile);
-        $jsonOutputPath =  $this->outputPath . substr($pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.json', 4);
+        $servicePath = substr($pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.json', 4);
+        $servicePath = strtolower($servicePath);
 
-        return strtolower($jsonOutputPath);
+        return $this->outputPath . $servicePath;
     }
 }

@@ -17,12 +17,11 @@
 
 namespace Google\Cloud\Exception;
 
-use Exception;
-
 /**
- * Exception thrown when a request fails.
+ * Exception thrown when a request fails due to an error in the request.
+ * In REST context, this exception indicates a status code 400.
  */
-class GoogleException extends Exception
+class BadRequestException extends ServiceException
 {
 
 }

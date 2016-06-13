@@ -65,7 +65,7 @@ class RequestWrapperTest extends \PHPUnit_Framework_TestCase
         $request = new Request('GET', 'http://www.example.com');
         $credentialsFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $credentialsFetcher->fetchAuthToken(Argument::any())
-            ->willReturn(['access_token' => 'abc'])
+            ->willReturn(['access_token' => 'abc', 'expires_in' => 100])
             ->shouldBeCalledTimes(1);
 
         $requestWrapper = new RequestWrapper([
@@ -136,7 +136,7 @@ class RequestWrapperTest extends \PHPUnit_Framework_TestCase
             ->willReturn(['access_token' => 'abc']);
 
         return [
-            [$config + ['keyFile' => file_get_contents($keyFilePath)]], // keyFile
+            [$config + ['keyFile' => json_decode(file_get_contents($keyFilePath), true)]], // keyFile
             [$config + ['keyFilePath' => $keyFilePath]], //keyFilePath
             [$config + ['credentialsFetcher' => $credentialsFetcher->reveal()]], // user supplied fetcher
             [$config] // application default
@@ -157,7 +157,7 @@ class RequestWrapperTest extends \PHPUnit_Framework_TestCase
         $keyFilePath = __DIR__ . '/fixtures/json-key-fixture.json';
 
         return [
-            [$config + ['keyFile' => file_get_contents($keyFilePath)]], // keyFile
+            [$config + ['keyFile' => json_decode(file_get_contents($keyFilePath), true)]], // keyFile
             [$config + ['keyFilePath' => $keyFilePath]], //keyFilePath
         ];
     }
@@ -215,6 +215,22 @@ class RequestWrapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException Google\Cloud\Exception\BadRequestException
+     */
+    public function testThrowsBadRequestException()
+    {
+        $requestWrapper = new RequestWrapper([
+            'httpHandler' => function ($request, $options = []) {
+                throw new \Exception('', 400);
+            }
+        ]);
+
+        $requestWrapper->send(
+            new Request('GET', 'http://www.example.com')
+        );
+    }
+
+    /**
      * @expectedException Google\Cloud\Exception\NotFoundException
      */
     public function testThrowsNotFoundException()
@@ -238,6 +254,22 @@ class RequestWrapperTest extends \PHPUnit_Framework_TestCase
         $requestWrapper = new RequestWrapper([
             'httpHandler' => function ($request, $options = []) {
                 throw new \Exception('', 409);
+            }
+        ]);
+
+        $requestWrapper->send(
+            new Request('GET', 'http://www.example.com')
+        );
+    }
+
+    /**
+     * @expectedException Google\Cloud\Exception\ServerException
+     */
+    public function testThrowsServerException()
+    {
+        $requestWrapper = new RequestWrapper([
+            'httpHandler' => function ($request, $options = []) {
+                throw new \Exception('', 500);
             }
         ]);
 

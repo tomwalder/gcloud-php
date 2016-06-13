@@ -20,6 +20,7 @@ namespace Google\Cloud\Tests\BigQuery;
 use Google\Cloud\BigQuery\Connection\ConnectionInterface;
 use Google\Cloud\BigQuery\Job;
 use Google\Cloud\BigQuery\QueryResults;
+use Google\Cloud\Exception\NotFoundException;
 use Prophecy\Argument;
 
 class JobTest extends \PHPUnit_Framework_TestCase
@@ -53,7 +54,8 @@ class JobTest extends \PHPUnit_Framework_TestCase
 
     public function testDoesExistFalse()
     {
-        $this->connection->getJob(Argument::any())->willThrow(new \Exception(null, 404))
+        $this->connection->getJob(Argument::any())
+            ->willThrow(new NotFoundException(null))
             ->shouldBeCalledTimes(1);
         $job = $this->getJob($this->connection);
 
@@ -76,7 +78,7 @@ class JobTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(1);
         $job = $this->getJob($this->connection);
 
-        $this->assertInstanceOf(QueryResults::class, $job->getQueryResults());
+        $this->assertInstanceOf(QueryResults::class, $job->queryResults());
     }
 
     public function testIsCompleteTrue()
@@ -99,7 +101,7 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->connection->getJob(Argument::any())->shouldNotBeCalled();
         $job = $this->getJob($this->connection, $this->jobInfo);
 
-        $this->assertEquals($this->jobInfo, $job->getInfo());
+        $this->assertEquals($this->jobInfo, $job->info());
     }
 
     public function testGetsInfoWithRealod()
@@ -109,21 +111,21 @@ class JobTest extends \PHPUnit_Framework_TestCase
             ->shouldBeCalledTimes(1);
         $job = $this->getJob($this->connection);
 
-        $this->assertEquals($this->jobInfo, $job->getInfo());
+        $this->assertEquals($this->jobInfo, $job->info());
     }
 
     public function testGetsId()
     {
         $job = $this->getJob($this->connection);
 
-        $this->assertEquals($this->jobId, $job->getId());
+        $this->assertEquals($this->jobId, $job->id());
     }
 
     public function testGetsIdentity()
     {
         $job = $this->getJob($this->connection);
 
-        $this->assertEquals($this->jobId, $job->getIdentity()['jobId']);
-        $this->assertEquals($this->projectId, $job->getIdentity()['projectId']);
+        $this->assertEquals($this->jobId, $job->identity()['jobId']);
+        $this->assertEquals($this->projectId, $job->identity()['projectId']);
     }
 }
