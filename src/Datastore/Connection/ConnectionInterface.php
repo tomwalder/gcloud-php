@@ -24,4 +24,12 @@ namespace Google\Cloud\Datastore\Connection;
 interface ConnectionInterface
 {
 
+    /**
+     * Start a new transaction in Datastore and return it's reference
+     *
+     * @param array $args
+     * @return string
+     */
+    public function beginTransaction(array $args = []);
+
 }
