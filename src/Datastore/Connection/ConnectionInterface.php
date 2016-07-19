@@ -16,6 +16,10 @@
  */
 
 namespace Google\Cloud\Datastore\Connection;
+use Google\Cloud\Datastore\GqlQuery;
+use Google\Cloud\Datastore\PartitionId;
+use Google\Cloud\Datastore\Query;
+use Google\Cloud\Datastore\ReadOptions;
 
 /**
  * Represents a connection to
@@ -30,6 +34,36 @@ interface ConnectionInterface
      * @param array $args
      * @return string
      */
-    public function beginTransaction(array $args = []);
+    public function beginTransaction($project, array $args = []);
+
+    /**
+     * Run a GQL Query and return the response
+     *
+     * @param PartitionId $partition
+     * @param ReadOptions $options
+     * @param GqlQuery $query
+     * @param array $args
+     * @return mixed
+     */
+    public function runGqlQuery(PartitionId $partition, ReadOptions $options, GqlQuery $query, array $args = []);
+
+    /**
+     * Run a standard Query and return the response
+     *
+     * @param PartitionId $partition
+     * @param ReadOptions $options
+     * @param Query $query
+     * @param array $args
+     * @return mixed
+     */
+    public function runQuery(PartitionId $partition, ReadOptions $options, Query $query, array $args = []);
+
+    public function allocateIds(array $args = []);
+
+    public function lookup(array $args = []);
+
+    public function commit(array $args = []);
+
+    public function rollback(array $args = []);
 
 }

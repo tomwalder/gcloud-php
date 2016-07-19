@@ -82,7 +82,24 @@ class DatastoreClient
      */
     public function beginTransaction()
     {
-        return $this->connection->beginTransaction(['projectId' => $this->projectId]);
+        // return $this->connection->beginTransaction(['projectId' => $this->projectId]);
+        return $this->connection->beginTransaction($this->projectId);
+    }
+
+    /**
+     * Execute a GQL query and return the result
+     *
+     * @param $gql
+     * @param array $params
+     * @return mixed
+     */
+    public function runGqlQuery($gql, array $params = [])
+    {
+        return $this->connection->runGqlQuery(
+            new PartitionId($this->projectId),
+            new ReadOptions(),
+            (new GqlQuery($gql))->setNamedParams($params)
+        );
     }
 
 }

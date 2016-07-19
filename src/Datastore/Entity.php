@@ -20,4 +20,90 @@ namespace Google\Cloud\Datastore;
 class Entity
 {
 
+    /**
+     * @var Key
+     */
+    private $key;
+
+    /**
+     * Entity Properties - a string-indexed array of Values
+     *
+     * @var Value[]
+     */
+    private $properties = [];
+
+    /**
+     * If we are passed a Kind, then build a basic Key
+     *
+     * @todo consider PartitionId when building basic Key
+     *
+     * @param null $kind
+     */
+    public function __construct($kind = null)
+    {
+        if(null !== $kind) {
+            $this->key = (new Key())
+                ->setPath(new KeyPathElement($kind));
+        }
+    }
+
+    /**
+     * Get all properties
+     *
+     * @return Value[]
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * Get a property
+     *
+     * @param $property
+     * @return Value|null
+     */
+    public function getProperty($property)
+    {
+        if(isset($this->properties[$property])) {
+            return $this->properties[$property];
+        }
+        return null;
+    }
+
+    /**
+     * Add a property to the Entity
+     *
+     * @param $property
+     * @param Value $value
+     */
+    public function setProperty($property, Value $value)
+    {
+        $this->properties[$property] = $value;
+    }
+
+    /**
+     * Set a specific property
+     *
+     * @todo Consider type-hinting OR autodetect value
+     *
+     * @param $property
+     * @param $value
+     */
+    public function __set($property, $value)
+    {
+        $this->setProperty($property, $value);
+    }
+
+    /**
+     * Get a property
+     *
+     * @param $property
+     * @return Value|null
+     */
+    public function __get($property)
+    {
+        return $this->getProperty($property);
+    }
+
 }
